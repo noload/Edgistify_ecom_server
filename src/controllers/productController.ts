@@ -3,6 +3,7 @@ import { PaginationDTO } from "../dtos/paginationDTO";
 import ProductModel, { ProductI } from "../models/Product";
 import { orderCost } from "../utils/orderCost";
 import { checkProductAndQuantityAvailability } from "../utils/product";
+import { isValidObjectId } from "mongoose";
 
 const getAllProduct = async (req: Request, res: Response): Promise<any> => {
   try {
@@ -10,10 +11,11 @@ const getAllProduct = async (req: Request, res: Response): Promise<any> => {
     const Page = Number(page);
     const Limit = Number(limit);
     const skip = (Page - 1) * Limit;
-    const {category} = req.params
-
-    const filter = category === "all" ? {} : { category: new RegExp(`^${category}`, "i") };
-
+    const { category } = req.params;
+    
+    const filter =
+      (category === "all" || category == undefined )? {} : { category: new RegExp(`^${category}`, "i") };
+      
     const products = await ProductModel.find(filter).skip(skip).limit(Limit);
 
     const totalCount = await ProductModel.countDocuments(filter);
@@ -50,28 +52,49 @@ const addToCart = async (req: Request, res: Response): Promise<any> => {
       });
     }
     if (!(await checkProductAndQuantityAvailability(orderItems))) {
-      return res
-        .status(400)
-        .json({
-          message:
-            "Product is not found or Quantity greater than stock available",
-        });
+      return res.status(400).json({
+        message:
+          "Product is not found or Quantity greater than stock available",
+      });
     }
 
-    return res
-      .status(200)
-      .json({
-        message: "OrderItem added to cart successfully",
-        orderCost: {
-          ...orderCost,
-          subTotal: Number(orderCost.subTotal.toFixed()),
-        },
-        orderItems
-      });
+    return res.status(200).json({
+      message: "OrderItem added to cart successfully",
+      orderCost: {
+        ...orderCost,
+        subTotal: Number(orderCost.subTotal.toFixed()),
+      },
+      orderItems,
+    });
   } catch (error) {
     console.log(`Error in addToCart controller`, error);
     return res.status(500).json({ message: "Failed to add cart " });
   }
 };
 
-export default { getAllProduct, addToCart };
+const getByProductId = async (req: Request, res: Response): Promise<any> => {
+  const { id } = req.params;
+  try {
+    if (!id || !isValidObjectId(id)) {
+      return res
+        .status(400)
+        .json({ message: "Product is required or is not valid ObjectId" });
+    }
+
+    const product = await ProductModel.findById(id);
+
+    if (!product) {
+      return res.status(404).json({ message: "Product not found" });
+    }
+
+    return res
+      .status(200)
+      .json({ message: "Product data fetched successfully", data: product });
+  } catch (error) {
+    console.log(`Error in get product by id`, error);
+    return res
+      .status(500)
+      .json({ message: "Failed to get product based on id" });
+  }
+};
+export default { getAllProduct, addToCart,getByProductId };
