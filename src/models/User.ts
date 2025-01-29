@@ -23,7 +23,12 @@ userSchema.methods.comparePassword = function (password:string){
         throw new Error((error as Error).message)   
     }
 }
-
+userSchema.methods.toJSON = function() {
+    const user = this.toObject();
+    delete user.password;
+    delete user.__v;
+    return user;
+  };
 
 userSchema.pre("save",async function (next){
     if (this.isModified("password")) {

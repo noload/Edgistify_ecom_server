@@ -35,7 +35,7 @@ const login = async (req: Request, res: Response):Promise<any> => {
   try {
     const { email, password } = req.body as UserLoginRequest;
 
-    const findUser = await UserModel.findOne({ email });
+    const findUser = await UserModel.findOne({ email })
 
     if (!findUser) {
       return res.status(404).json({ message: "user not found" });
@@ -55,7 +55,7 @@ const login = async (req: Request, res: Response):Promise<any> => {
       maxAge: 24 * 60 * 60 * 1000,
     });
 
-    return res.status(200).json({ message: "User loggedIn successfully", token,user:findUser });
+    return res.status(200).json({ message: "User loggedIn successfully", token,user:findUser.toJSON() });
   } catch (error) {
     console.log("Error in controller", error);
     return res.status(500).json({ message: (error as Error).message });

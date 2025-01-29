@@ -4,6 +4,7 @@ import UserModel from "../models/User";
 import razorpay from "../services/razorpay";
 import OrderModel, { PaymentI } from "../models/Order";
 import crypto from "crypto";
+
 const placeOrder = async (
   req: Request<{}, {}, PlaceOrderRequestDTO>,
   res: Response
@@ -65,8 +66,7 @@ const validatePayment = async (req: Request, res: Response): Promise<any> => {
 
     const digest = shasum.digest("hex");
 
-    if (digest !== razorpaySignature)
-      return res.status(400).json({ message: "Transaction not legit!" });
+    if (digest != razorpaySignature) return res.status(400).json({ message: "Transaction not legit!" });
 
     const paymentDetails = {
       paymentStatus: "Paid",
