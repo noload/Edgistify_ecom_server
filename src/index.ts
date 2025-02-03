@@ -11,12 +11,7 @@ env.config();
 
 const app = express();
 
-app.use(
-  cors({
-    origin: process.env.FrontendOrigin as string,
-    credentials: true,
-  })
-);
+app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookeParser());
