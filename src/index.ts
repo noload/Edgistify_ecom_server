@@ -1,9 +1,9 @@
-import express,{Request,Response,} from "express";
+import express, { Request, Response } from "express";
 import env from "dotenv";
-import cors from 'cors'
-import connectionDatabase from "./config/db"
+import cors from "cors";
+import connectionDatabase from "./config/db";
 
-import appRoute from "./route/index"
+import appRoute from "./route/index";
 import cookeParser from "cookie-parser";
 import ProductModel from "./models/Product";
 
@@ -11,24 +11,107 @@ env.config();
 
 const app = express();
 
-app.use(cors({
+app.use(
+  cors({
     origin: "http://localhost:5173",
-    credentials: true
-  }));
-app.use(express.json())
-app.use(express.urlencoded({extended:true}))
+    credentials: true,
+  })
+);
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 app.use(cookeParser());
 
-app.use("/api",appRoute)
+app.use("/api", appRoute);
 
-connectionDatabase()
+app.get("/", (req: Request, res: Response) => {
+  res.send(`
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Welcome to My API</title>
+        <style>
+            body { 
+                font-family: Arial, sans-serif; 
+                text-align: center; 
+                margin: 50px; 
+                background-color: #f4f4f4; 
+                transition: background 0.3s, color 0.3s;
+            }
+            h1 { color: #4CAF50; }
+            p { font-size: 18px; }
+            .status { 
+                font-weight: bold; 
+                font-size: 22px;
+                color: #007bff; 
+                animation: blink 1.5s infinite alternate;
+            }
+            .live { color: green; font-weight: bold; }
+            .container {
+                max-width: 600px;
+                margin: auto;
+                background: white;
+                padding: 20px;
+                border-radius: 10px;
+                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            }
+            @keyframes blink {
+                0% { opacity: 1; }
+                100% { opacity: 0.5; }
+            }
+            .dark-mode {
+                background-color: #222;
+                color: #fff;
+            }
+            .toggle-btn {
+                padding: 10px 20px;
+                font-size: 16px;
+                margin-top: 10px;
+                border: none;
+                background: #007bff;
+                color: white;
+                cursor: pointer;
+                border-radius: 5px;
+                transition: 0.3s;
+            }
+            .toggle-btn:hover {
+                background: #0056b3;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <h1>🚀 Welcome to My API</h1>
+            <p class="status">Server Status: <span class="live">LIVE ✅</span></p>
+            <p>Current Time: <span id="time">${new Date().toLocaleString()}</span></p>
+            <p>Explore the API documentation <a href="#" target="_blank">here</a>.</p>
+            <button class="toggle-btn" onclick="toggleMode()">🌙 Toggle Dark Mode</button>
+        </div>
+
+        <script>
+            function updateTime() {
+                document.getElementById("time").innerText = new Date().toLocaleString();
+            }
+            setInterval(updateTime, 1000); // Update time every second
+
+            function toggleMode() {
+                document.body.classList.toggle("dark-mode");
+            }
+        </script>
+    </body>
+    </html>
+  `);
+});
+
+connectionDatabase();
 
 const port = process.env.PORT as unknown as number | 3000;
 
-app.listen(port,async ()=>{
-    console.log(`server started on port ${port}`)
-    // await inserBulk()
-})
+app.listen(port, async () => {
+  console.log(`server started on port ${port}`);
+  // await inserBulk()
+});
 
 // const inserBulk = async()=>{
 //     try {
@@ -276,6 +359,6 @@ app.listen(port,async ()=>{
 //         ]);
 //     } catch (error) {
 //         console.log(error);
-        
+
 //     }
 // }
